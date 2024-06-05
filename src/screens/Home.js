@@ -15,7 +15,7 @@ export default function Home({ navigation }) {
   };
   const _renderItem = ({ item }) => (
     <View>
-      <Text style={{ padding: 5, fontSize: 16 }}>Later</Text>
+      <Text style={{ padding: 10, fontSize: 16, color: "blue" }}>Later</Text>
       <TouchableOpacity delayPressIn={50}>
         <View style={styles.outerView}>
           <View style={styles.item}>
@@ -29,6 +29,8 @@ export default function Home({ navigation }) {
                 marginVertical: 3,
                 marginLeft: 35,
                 fontSize: 14,
+                fontWeight: "400",
+                color: "blue",
               }}
             >
               {item.date}
