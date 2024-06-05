@@ -7,19 +7,33 @@ import { ContextList } from "../contexts/ContextState";
 import { useContext } from "react";
 
 export default function Home({ navigation }) {
+  // modal vissibility
   const [modalVisible, setModalVisible] = useState(false);
   const { tasks } = useContext(ContextList);
-
   const _addTask = () => {
     navigation.navigate("Details");
   };
   const _renderItem = ({ item }) => (
     <View>
-      <Text style={{ padding: 10, fontSize: 16, color: "blue" }}>Later</Text>
-      <TouchableOpacity delayPressIn={50}>
-        <View style={styles.outerView}>
+      <Text
+        style={{
+          padding: 10,
+          fontSize: 16,
+          color: "#004997",
+          fontWeight: "bold",
+        }}
+      >
+        Later
+      </Text>
+      <TouchableOpacity activeOpacity={0.5} delayPressIn={50}>
+        <View
+          style={[
+            styles.outerView,
+            { backgroundColor: item.color ? item.color : "#004997" },
+          ]}
+        >
           <View style={styles.item}>
-            <Ionicons name="stop-outline" size={24} color="black" />
+            <Ionicons name="stop-outline" size={24} color="white" />
             <Text style={styles.title}>{item.title}</Text>
           </View>
           {item.date ? (
@@ -28,16 +42,26 @@ export default function Home({ navigation }) {
                 alignSelf: "stretch",
                 marginVertical: 3,
                 marginLeft: 35,
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: "400",
-                color: "blue",
+                color: "white",
               }}
             >
               {item.date}
             </Text>
           ) : null}
-
-          <Text style={{ marginLeft: 35, fontSize: 14 }}>{item.category}</Text>
+          {item.category ? (
+            <Text
+              style={{
+                marginLeft: 35,
+                fontSize: 16,
+                color: "white",
+                fontWeight: "500",
+              }}
+            >
+              {item.category}
+            </Text>
+          ) : null}
         </View>
       </TouchableOpacity>
     </View>
@@ -54,7 +78,7 @@ export default function Home({ navigation }) {
       </View>
 
       <TouchableOpacity style={styles.addButton} onPress={_addTask}>
-        <Ionicons name="add-circle" size={50} color="blue" />
+        <Ionicons name="add-circle-outline" size={50} color="white" />
       </TouchableOpacity>
       <Modal
         animationType="slide"
@@ -79,8 +103,9 @@ const styles = StyleSheet.create({
     right: 18,
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     marginLeft: 10,
+    color: "white",
   },
   item: {
     flexDirection: "row",

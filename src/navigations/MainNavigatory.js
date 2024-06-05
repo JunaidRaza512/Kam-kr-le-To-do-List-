@@ -75,7 +75,7 @@ export default function MainNavigator() {
                 </View>
               ),
               headerStyle: {
-                backgroundColor: "blue",
+                backgroundColor: "#004997",
               },
               headerTitleStyle: {
                 color: "white",
@@ -91,7 +91,7 @@ export default function MainNavigator() {
                 statusBarColor: "white",
                 title: "",
                 headerStyle: {
-                  backgroundColor: "blue",
+                  backgroundColor: "#004997",
                 },
                 headerTitleStyle: {
                   color: "white",

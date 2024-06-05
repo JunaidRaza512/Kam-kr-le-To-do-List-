@@ -7,6 +7,7 @@ import {
   Modal,
   Button,
   Alert,
+  Image,
 } from "react-native";
 import { useState } from "react";
 import React from "react";
@@ -22,6 +23,19 @@ import uuid from "react-native-uuid";
 import { format } from "date-fns";
 
 export default function Details({ navigation }) {
+  // colors  array
+  const backGroundColors = [
+    "#5CD859",
+    "#24A6D9",
+    "#595BD9",
+    "#8022D9",
+    "#D159D8",
+    "#D85963",
+    "#D88559",
+  ];
+  const [newTaskColor, setnewTaskColor] = useState("");
+
+  // formatted date
   const [formattedDate, setFormattedDate] = useState(
     format(new Date(), "MMMM d, yyyy")
   );
@@ -41,6 +55,7 @@ export default function Details({ navigation }) {
         title: _addedActivity,
         date: formattedDate,
         category: value,
+        color: newTaskColor,
       };
       addTask(activity);
       set_addedActivity("");
@@ -83,7 +98,6 @@ export default function Details({ navigation }) {
     // setDate(currentDate);
     // setShowDatePicker(false);
     // setShowTime(true);
-
     setShowDatePicker(false);
     if (selectedDate) {
       setDate(selectedDate);
@@ -135,7 +149,9 @@ export default function Details({ navigation }) {
         }}
       >
         <View style={styles.container}>
-          <Text style={[styles.textStyle, { fontWeight: "500" }]}>
+          <Text
+            style={[styles.textStyle, { fontWeight: "500", color: "#004997" }]}
+          >
             Please Write your Activity?
           </Text>
           <View
@@ -166,7 +182,9 @@ export default function Details({ navigation }) {
               marginBottom: 40,
             }}
           />
-          <Text style={[styles.textStyle, { fontWeight: "500" }]}>
+          <Text
+            style={[styles.textStyle, { fontWeight: "500", color: "#004997" }]}
+          >
             Due Date
           </Text>
           <TouchableOpacity
@@ -245,7 +263,9 @@ export default function Details({ navigation }) {
             />,
           ]}
 
-          <Text style={[styles.textStyle, { fontWeight: "500" }]}>
+          <Text
+            style={[styles.textStyle, { fontWeight: "500", color: "#004997" }]}
+          >
             Add List
           </Text>
           <View
@@ -256,25 +276,27 @@ export default function Details({ navigation }) {
               alignItems: "center",
             }}
           >
-            <DropDownPicker
-              open={isOpen}
-              value={value}
-              items={items}
-              setOpen={() => setOpen(!isOpen)}
-              setValue={(val) => setValue(val)}
-              setItems={setItems}
-              style={styles.dropDown}
-              dropDownContainerStyle={styles.dropDownContainerStyle}
-              dropDownDirection="BOTTOM"
-              placeholder="Category"
-              placeholderStyle={{
-                color: "black",
-                fontSize: 18,
-                fontWeight: "400",
-              }}
-              textStyle={styles.textStyle}
-              listMode="SCROLLVIEW"
-            />
+            {
+              <DropDownPicker
+                open={isOpen}
+                value={value}
+                items={items}
+                setOpen={() => setOpen(!isOpen)}
+                setValue={(val) => setValue(val)}
+                setItems={setItems}
+                style={styles.dropDown}
+                dropDownContainerStyle={styles.dropDownContainerStyle}
+                dropDownDirection="BOTTOM"
+                placeholder="Category"
+                placeholderStyle={{
+                  color: "black",
+                  fontSize: 18,
+                  fontWeight: "400",
+                }}
+                textStyle={styles.pickerStyle}
+                listMode="SCROLLVIEW"
+              />
+            }
           </View>
           <View
             style={{
@@ -282,6 +304,7 @@ export default function Details({ navigation }) {
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "space-evenly",
+              marginBottom: 35,
             }}
           >
             <Text style={styles.textStyle}>Add a new Category</Text>
@@ -324,12 +347,36 @@ export default function Details({ navigation }) {
               </View>
             </Modal>
           </View>
+          <View
+            style={{
+              flexDirection: "row",
+            }}
+          >
+            {backGroundColors.map((element, index) => (
+              <TouchableOpacity
+                style={{ marginRight: 12 }}
+                key={index}
+                onPress={() => setnewTaskColor(element)}
+              >
+                <Image
+                  style={{
+                    backgroundColor: element,
+                    padding: 10,
+                    borderRadius: 8,
+                    height: 35,
+                    width: 35,
+                    alignSelf: "center",
+                  }}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
         <TouchableOpacity
           onPress={taskAdded}
-          style={{ position: "absolute", bottom: 40, right: 40 }}
+          style={{ position: "absolute", bottom: 30, right: 40 }}
         >
-          <AntDesign name="checkcircleo" size={40} color="blue" />
+          <AntDesign name="checkcircleo" size={40} color="#004997" />
         </TouchableOpacity>
       </View>
     </KeyboardAwareScrollView>
@@ -352,7 +399,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "500",
     fontSize: 18,
-    color: "blue",
+    color: "#004997",
   },
   inputValue: {
     color: "#888",
@@ -372,7 +419,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     borderWidth: 0,
   },
-  textStyle: {
+  pickerStyle: {
     fontSize: 18, // Change this to your desired font size
   },
   modalContainer: {
