@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export const ContextList = createContext();
 export const ContextState = ({ children }) => {
+  // FlatList Data
   const [tasks, settasks] = useState([
     {
       id: 1,
@@ -53,13 +54,46 @@ export const ContextState = ({ children }) => {
       category: "Personal",
     },
   ]);
-
+  // DropdownPIcker Component data
+  const [isOpen, setOpen] = useState(false);
+  const [value, setValue] = useState(null); // value selcted in items
+  const [items, setItems] = useState([
+    { label: "Work", value: "work" },
+    {
+      label: "Personal",
+      value: "personal",
+    },
+    {
+      label: "Errands",
+      value: "errands",
+    },
+    {
+      label: "Birthday",
+      value: "birthday",
+    },
+    {
+      label: "School",
+      value: "school",
+    },
+  ]);
   const addTask = (task) => {
     console.log(task);
     settasks([...tasks, task]);
   };
   return (
-    <ContextList.Provider value={{ tasks, addTask }}>
+    <ContextList.Provider
+      value={{
+        tasks,
+        addTask,
+        settasks,
+        items,
+        setItems,
+        isOpen,
+        setOpen,
+        value,
+        setValue,
+      }}
+    >
       {children}
     </ContextList.Provider>
   );

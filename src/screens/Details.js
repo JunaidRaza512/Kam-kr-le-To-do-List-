@@ -23,6 +23,8 @@ import uuid from "react-native-uuid";
 import { format } from "date-fns";
 
 export default function Details({ navigation }) {
+  // console.log(format(new Date(), "MMMM d, yyyy"));
+  // console.log(format(new Date(), "h:mm a"));
   // colors  array
   const backGroundColors = [
     "#5CD859",
@@ -34,18 +36,11 @@ export default function Details({ navigation }) {
     "#D88559",
   ];
   const [newTaskColor, setnewTaskColor] = useState("");
-
-  // formatted date
-  const [formattedDate, setFormattedDate] = useState(
-    format(new Date(), "MMMM d, yyyy")
-  );
-  const [formattedTime, setFormattedTime] = useState(
-    format(new Date(), "h:mm a")
-  );
+  // adding new items dynamically into flatlist function
   const { addTask } = useContext(ContextList);
   // task Added InputText usestate
   const [_addedActivity, set_addedActivity] = useState("");
-  //const navigation = useNavigation();
+  // items added function handling
   const taskAdded = () => {
     if (_addedActivity.trim() === "") {
       Alert.alert("Error", "Please Enter your Task");
@@ -56,6 +51,7 @@ export default function Details({ navigation }) {
         date: formattedDate,
         category: value,
         color: newTaskColor,
+        presentDay: day,
       };
       addTask(activity);
       set_addedActivity("");
@@ -64,8 +60,9 @@ export default function Details({ navigation }) {
   };
   //Modal of Add new category
   const [isModalVisible, setIsModalVisible] = useState(false);
+  // category input state
   const [task, setTask] = useState("");
-  //function of add category
+  //function of adding category
   const handleAddTask = () => {
     // Logic to add task to a list
     if (task.trim() === "") {
@@ -83,11 +80,18 @@ export default function Details({ navigation }) {
       setIsModalVisible(false);
     }
   };
-  //InputText Height
+  //InputText Height to change size
   const [inputHeight, setInputHeight] = useState(0);
   // datepicker and time picker
   const [date, setDate] = useState(new Date()); // date usestate
   const [time, setTime] = useState(new Date()); // time usestate
+  const [formattedDate, setFormattedDate] = useState(
+    format(new Date(), "MMMM d, yyyy")
+  );
+  const [formattedTime, setFormattedTime] = useState(
+    format(new Date(), "h:mm a")
+  );
+  const [day, setDay] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false); // showdatepicker usestate
   const [showTimePicker, setShowTimePicker] = useState(false); ///time picker usestate
   const [showTime, setShowTime] = useState(false); //conditional rendering of time text
@@ -102,6 +106,8 @@ export default function Details({ navigation }) {
     if (selectedDate) {
       setDate(selectedDate);
       setFormattedDate(format(selectedDate, "MMMM d, yyyy"));
+      const day = selectedDate.toLocaleDateString("en-US", { weekday: "long" });
+      setDay(day);
       setShowTime(true);
     }
   };
@@ -113,28 +119,8 @@ export default function Details({ navigation }) {
     setFormattedTime(format(currentTime, "h:mm a"));
   };
   // dropdown picker
-  const [isOpen, setOpen] = useState(false);
-  const [value, setValue] = useState(null); // value selcted in items
-  //items in a dropdownpicker
-  const [items, setItems] = useState([
-    { label: "Work", value: "work" },
-    {
-      label: "Personal",
-      value: "personal",
-    },
-    {
-      label: "Errands",
-      value: "errands",
-    },
-    {
-      label: "Birthday",
-      value: "birthday",
-    },
-    {
-      label: "School",
-      value: "school",
-    },
-  ]);
+  const { isOpen, setOpen, value, setValue, items, setItems } =
+    useContext(ContextList);
 
   return (
     <KeyboardAwareScrollView
@@ -177,7 +163,7 @@ export default function Details({ navigation }) {
           <View
             style={{
               height: 1,
-              backgroundColor: "blue",
+              backgroundColor: "#004997",
               width: 320,
               marginBottom: 40,
             }}
@@ -215,7 +201,7 @@ export default function Details({ navigation }) {
           <View
             style={{
               height: 1,
-              backgroundColor: "blue",
+              backgroundColor: "#004997",
               width: 320,
               marginBottom: 30,
             }}
@@ -256,7 +242,7 @@ export default function Details({ navigation }) {
               key="view"
               style={{
                 height: 1,
-                backgroundColor: "blue",
+                backgroundColor: "#004997",
                 width: 320,
                 marginBottom: 50,
               }}
@@ -289,12 +275,14 @@ export default function Details({ navigation }) {
                 dropDownDirection="BOTTOM"
                 placeholder="Category"
                 placeholderStyle={{
-                  color: "black",
+                  color: "white",
                   fontSize: 18,
                   fontWeight: "400",
                 }}
                 textStyle={styles.pickerStyle}
                 listMode="SCROLLVIEW"
+                tickIconStyle={styles.tickIcon} // Style for tick icon
+                arrowIconStyle={styles.arrowIcon} // Style for arrow icon
               />
             }
           </View>
@@ -410,17 +398,18 @@ const styles = StyleSheet.create({
   dropDown: {
     height: 40,
     width: "100%",
-    marginBottom: 20,
     elevation: 2,
     borderWidth: 0,
+    backgroundColor: "#004997",
   },
   dropDownContainerStyle: {
-    backgroundColor: "#fff",
+    backgroundColor: "#004997",
     elevation: 2,
     borderWidth: 0,
   },
   pickerStyle: {
     fontSize: 18, // Change this to your desired font size
+    color: "white",
   },
   modalContainer: {
     flex: 1,
@@ -440,5 +429,11 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     width: 200,
+  },
+  tickIcon: {
+    tintColor: "#004997", // Change the color of the tick icon
+  },
+  arrowIcon: {
+    tintColor: "white", // Change the color of the arrow icon
   },
 });
