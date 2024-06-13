@@ -21,6 +21,7 @@ import { View } from "react-native";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import filter from "lodash.filter";
 
 export default function Home({ navigation }) {
   const {
@@ -36,7 +37,36 @@ export default function Home({ navigation }) {
   } = useContext(ContextList);
   //Search Filter State
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const textInputRef = useRef(null);
+  const [matchData, setMatchData] = useState([]);
+
+  const handleSearchQuery = (query) => {
+    setSearchQuery(query);
+    // const formattedQuery = filteredItems.toLowerCase();
+    // const filteredData = filter(filteredItems, (user) => {
+    //   //console.log(user);
+    //   return handleQuery(user, formattedQuery);
+    const searchList = filteredItems.filter(
+      (items) =>
+        items.title.toLowerCase().includes(query.toLowerCase()) ||
+        items.category.toLowerCase().includes(query.toLowerCase())
+    );
+    setMatchData(searchList);
+  };
+  function handleQuery({ title, category }, query) {
+    // const { first, last } = title;
+    console.log(title);
+    if (
+      title.includes(query) ||
+      // last.includes(query) ||
+      category.includes(query)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   //FUNCTION TO TOGGLE search
   const handleSearchIconPress = () => {
     setIsSearchActive(true);
@@ -46,6 +76,7 @@ export default function Home({ navigation }) {
   };
   const handleCancelPress = () => {
     setIsSearchActive(false);
+    setSearchQuery("");
     //setSearchText("");
   };
   // const handleOutsidePress = () => {
@@ -220,6 +251,9 @@ export default function Home({ navigation }) {
                 style={styles.textInput}
                 placeholder="Search..."
                 placeholderTextColor="#fff"
+                clearButtonMode="always"
+                value={searchQuery}
+                onChangeText={(query) => handleSearchQuery(query)}
                 onBlur={() => setIsSearchActive(false)}
               />
             </View>
@@ -265,7 +299,7 @@ export default function Home({ navigation }) {
       </View>
       <FlatList
         showsVerticalScrollIndicator={false}
-        data={filteredItems}
+        data={searchQuery.length > 0 ? matchData : filteredItems}
         renderItem={_renderItem}
         keyExtractor={(item) => item.id}
       />
