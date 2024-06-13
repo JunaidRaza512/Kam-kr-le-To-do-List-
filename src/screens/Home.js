@@ -1,4 +1,10 @@
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  TouchableWithoutFeedback,
+} from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { FlatList } from "react-native";
@@ -13,6 +19,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
 import { View } from "react-native";
 import { useEffect } from "react";
+import { useRef } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function Home({ navigation }) {
   const {
@@ -26,6 +34,25 @@ export default function Home({ navigation }) {
     items,
     setItems,
   } = useContext(ContextList);
+  //Search Filter State
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const textInputRef = useRef(null);
+  //FUNCTION TO TOGGLE search
+  const handleSearchIconPress = () => {
+    setIsSearchActive(true);
+    setTimeout(() => {
+      textInputRef.current.focus();
+    }, 100); // Ensure the TextInput is focused after it appears
+  };
+  const handleCancelPress = () => {
+    setIsSearchActive(false);
+    //setSearchText("");
+  };
+  // const handleOutsidePress = () => {
+  //   if (isOpen) {
+  //     setOpen(false);
+  //   }
+  // };
 
   // categorizing your items in flatlist
   const [filteredItems, setFilteredItems] = useState(tasks);
@@ -149,66 +176,111 @@ export default function Home({ navigation }) {
     </View>
   );
   return (
-    <SafeAreaView style={styles.container}>
-      <View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignContent: "center",
-            justifyContent: "space-between",
-            backgroundColor: "#004997",
-            zIndex: 10000,
-            height: 60,
-            width: "100%",
-          }}
-        >
+    // <SafeAreaView style={styles.container}>
+    // <TouchableWithoutFeedback onPress={handleOutsidePress}>
+    <View style={styles.container}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignContent: "center",
+          justifyContent: "space-between",
+          backgroundColor: "#004997",
+          zIndex: 10000,
+          height: 60,
+          width: "100%",
+        }}
+      >
+        {isSearchActive ? (
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              justifyContent: "space-around",
-              marginLeft: 10,
+              //justifyContent: "space-between",
+              flex: 1,
             }}
           >
-            <MaterialCommunityIcons
-              name="sticker-check"
-              size={24}
-              color="white"
-            />
-            <MyDropdownPicker
-              open={isOpen}
-              setOpen={setOpen}
-              value={value}
-              setValue={setValue}
-              items={items}
-              setItems={setItems}
-            />
-          </View>
-
-          <View style={{ justifyContent: "center", marginRight: 15 }}>
-            <TouchableOpacity>
-              <EvilIcons name="search" size={35} color="white" />
+            <TouchableOpacity onPress={handleCancelPress}>
+              <View style={{ marginLeft: 15 }}>
+                <Ionicons name="arrow-back" size={24} color="white" />
+              </View>
             </TouchableOpacity>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+
+                marginLeft: 50,
+                flex: 1,
+              }}
+            >
+              <EvilIcons name="search" size={30} color="white" />
+
+              <TextInput
+                ref={textInputRef}
+                style={styles.textInput}
+                placeholder="Search..."
+                placeholderTextColor="#fff"
+                onBlur={() => setIsSearchActive(false)}
+              />
+            </View>
           </View>
-        </View>
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={filteredItems}
-          renderItem={_renderItem}
-          keyExtractor={(item) => item.id}
-        />
-        <TouchableOpacity style={styles.addButton} onPress={_addTask}>
-          <Ionicons name="add-circle-outline" size={50} color="white" />
-        </TouchableOpacity>
+        ) : (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flex: 1,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-around",
+                padding: 10,
+              }}
+            >
+              <MaterialCommunityIcons
+                name="sticker-check"
+                size={24}
+                color="white"
+              />
+              <MyDropdownPicker
+                open={isOpen}
+                setOpen={setOpen}
+                value={value}
+                setValue={setValue}
+                items={items}
+                setItems={setItems}
+              />
+            </View>
+            <View style={{ padding: 10 }}>
+              <TouchableOpacity onPress={handleSearchIconPress}>
+                <EvilIcons name="search" size={35} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
-    </SafeAreaView>
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        data={filteredItems}
+        renderItem={_renderItem}
+        keyExtractor={(item) => item.id}
+      />
+      <TouchableOpacity style={styles.addButton} onPress={_addTask}>
+        <Ionicons name="add-circle-outline" size={50} color="white" />
+      </TouchableOpacity>
+    </View>
+    // </TouchableWithoutFeedback>
+    //   </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: "center",
-    alignItems: "center",
+    flex: 1,
   },
   addButton: {
     position: "absolute",
@@ -240,5 +312,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 12,
     width: 100,
+  },
+  textInput: {
+    marginLeft: 15,
+    fontSize: 18,
+    color: "white",
+    padding: 10,
   },
 });
