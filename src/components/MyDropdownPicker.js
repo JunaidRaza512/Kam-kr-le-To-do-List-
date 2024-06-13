@@ -1,36 +1,37 @@
 import React, { useContext } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
-import { ContextList } from "../contexts/ContextState"; // Adjust the path as needed
 import { StyleSheet, View } from "react-native";
 
-const MyDropdownPicker = () => {
-  const { isOpen, setOpen, value, setValue, items, setItems } =
-    useContext(ContextList);
-
+const MyDropdownPicker = ({
+  value,
+  setValue,
+  items,
+  setItems,
+  open,
+  setOpen,
+}) => {
   return (
     <View>
       <DropDownPicker
-        open={isOpen}
+        open={open}
         value={value}
         items={items}
         setOpen={setOpen}
-        setValue={setValue}
+        setValue={(text) => setValue(text)}
         setItems={setItems}
         style={styles.dropDown}
         dropDownContainerStyle={styles.dropDownContainerStyle}
         dropDownDirection="BOTTOM"
         placeholder="All Lists"
-        placeholderStyle={{
-          color: "white",
-          fontSize: 18,
-          fontWeight: "400",
-        }}
+        // placeholderStyle={{
+        //   color: "white",
+        //   fontSize: 18,
+        //   fontWeight: "400",
+        // }}
         textStyle={styles.pickerStyle}
         listMode="SCROLLVIEW"
         arrowIconStyle={styles.arrowIcon} // Style for arrow icon
         tickIconStyle={styles.tickIcon} // Style for tick icon
-        //   zIndex={1000}
-        //   zIndexInverse={6000}
       />
     </View>
   );
@@ -38,7 +39,6 @@ const MyDropdownPicker = () => {
 
 const styles = StyleSheet.create({
   container: {
-    //flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#004997",
     borderWidth: 0,
     width: 150,
+    maxHeight: 1000,
   },
 
   pickerStyle: {

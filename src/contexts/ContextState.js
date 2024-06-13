@@ -10,13 +10,13 @@ export const ContextState = ({ children }) => {
       id: 1,
       title: "First Item",
       date: "4th feb,2024",
-      category: "shopping",
+      category: "Shopping",
     },
     {
       id: 2,
       title: "Second Item",
       date: "4th feb,2024",
-      category: "Default",
+      category: "Birthday",
     },
     {
       id: 3,
@@ -56,8 +56,9 @@ export const ContextState = ({ children }) => {
   ]);
   // DropdownPIcker Component data
   const [isOpen, setOpen] = useState(false);
-  const [value, setValue] = useState(null); // value selcted in items
+  const [value, setValue] = useState("All Lists"); // value selcted in items
   const [items, setItems] = useState([
+    { label: "All Lists", value: "All Lists" },
     { label: "Work", value: "work" },
     {
       label: "Personal",
@@ -75,10 +76,18 @@ export const ContextState = ({ children }) => {
       label: "School",
       value: "school",
     },
+    { label: "Finished", value: "Finished" },
   ]);
   const addTask = (task) => {
     console.log(task);
     settasks([...tasks, task]);
+  };
+  const updateItemCategory = (id, newCategory) => {
+    settasks((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, category: newCategory } : item
+      )
+    );
   };
   return (
     <ContextList.Provider
@@ -92,6 +101,7 @@ export const ContextState = ({ children }) => {
         setOpen,
         value,
         setValue,
+        updateItemCategory,
       }}
     >
       {children}

@@ -1,10 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Dimensions,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { FlatList } from "react-native";
@@ -18,16 +12,29 @@ import MyDropdownPicker from "../components/MyDropdownPicker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
 import { View } from "react-native";
+import { useEffect } from "react";
 
 export default function Home({ navigation }) {
-  //setting height dynamically
-  const { tasks, settasks } = useContext(ContextList);
+  const {
+    isOpen,
+    setOpen,
+    tasks,
+    settasks,
+    value,
+    setValue,
+    updateItemCategory,
+    items,
+    setItems,
+  } = useContext(ContextList);
+
+  // categorizing your items in flatlist
+  const [filteredItems, setFilteredItems] = useState(tasks);
   const _addTask = () => {
     navigation.navigate("Details");
   };
   // swipable close and
   const [swipedItemId, setSwipedItemId] = useState(null);
-  const rightSwipe = (deleteItem) => {
+  const leftSwipe = (deleteItem) => {
     return (
       <View style={styles.deleteButton}>
         <TouchableOpacity
@@ -48,6 +55,22 @@ export default function Home({ navigation }) {
   const handleDeleteItem = (id) => {
     settasks((prevData) => prevData.filter((item) => item.id !== id));
   };
+  // categorizing items
+  useEffect(() => {
+    if (value === "All Lists") {
+      setFilteredItems(tasks.filter((item) => item.category !== "Finished"));
+    } else {
+      setFilteredItems(tasks.filter((item) => item.category === value));
+    }
+  }, [value, tasks]);
+  // Task finished update
+
+  const [finish, setFinish] = useState(false);
+  const handleItemPress = (id) => {
+    // setFinish(!finish);
+    //console.log(id);
+    updateItemCategory(id, "Finished");
+  };
 
   const _renderItem = ({ item }) => (
     <View>
@@ -62,7 +85,7 @@ export default function Home({ navigation }) {
         {item.presentDay ? item.presentDay : "No date"}
       </Text>
       <Swipeable
-        renderRightActions={() => rightSwipe(() => handleDeleteItem(item.id))}
+        renderLeftActions={() => leftSwipe(() => handleDeleteItem(item.id))}
         onSwipeableOpen={() => setSwipedItemId(item.id)}
         onSwipeableClose={() => setSwipedItemId(null)}
         overshootRight={false}
@@ -82,7 +105,17 @@ export default function Home({ navigation }) {
           ]}
         >
           <View style={styles.item}>
-            <Ionicons name="stop-outline" size={24} color="white" />
+            <TouchableOpacity onPress={() => handleItemPress(item.id)}>
+              {/* {finish && item.id ? (
+                <MaterialCommunityIcons
+                  name="checkbox-marked"
+                  size={24}
+                  color="black"
+                />
+              ) : ( */}
+              <Ionicons name="stop-outline" size={24} color="white" />
+              {/* )} */}
+            </TouchableOpacity>
             <Text style={styles.title}>{item.title}</Text>
           </View>
           {item.date ? (
@@ -142,7 +175,14 @@ export default function Home({ navigation }) {
               size={24}
               color="white"
             />
-            <MyDropdownPicker />
+            <MyDropdownPicker
+              open={isOpen}
+              setOpen={setOpen}
+              value={value}
+              setValue={setValue}
+              items={items}
+              setItems={setItems}
+            />
           </View>
 
           <View style={{ justifyContent: "center", marginRight: 15 }}>
@@ -153,7 +193,7 @@ export default function Home({ navigation }) {
         </View>
         <FlatList
           showsVerticalScrollIndicator={false}
-          data={tasks}
+          data={filteredItems}
           renderItem={_renderItem}
           keyExtractor={(item) => item.id}
         />
