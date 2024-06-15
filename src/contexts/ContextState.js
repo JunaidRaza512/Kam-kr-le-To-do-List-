@@ -11,47 +11,55 @@ export const ContextState = ({ children }) => {
       title: "First Item",
       date: "4th feb,2024",
       category: "Shopping",
+      initialCategory: "Shopping",
     },
     {
       id: 2,
       title: "Second Item",
       date: "4th feb,2024",
       category: "Birthday",
+      initialCategory: "Birthday",
     },
     {
       id: 3,
       title: "Third Item",
       date: "4th feb,2024",
       category: "Work",
+      initialCategory: "Work",
     },
     {
       id: 45,
       title: "Third Item",
       date: "4th feb,2024",
       category: "Errands",
+      initialCategory: "Errands",
     },
     {
       id: 46,
       title: "Third Item",
       date: "4th feb,2024",
       category: "Errands",
+      initialCategory: "Errands",
     },
     {
       id: 47,
       title: "Third Item",
       date: "4th feb,2024",
       category: "WishList",
+      initialCategory: "WishList",
     },
     {
       id: 48,
       title: "Third Item",
       date: "4th feb,2024",
       category: "Personal",
+      initialCategory: "Personal",
     },
     {
       id: 41,
       title: "Third Item",
       category: "Personal",
+      initialCategory: "Personal",
     },
   ]);
   // DropdownPIcker Component data
@@ -82,11 +90,16 @@ export const ContextState = ({ children }) => {
     console.log(task);
     settasks([...tasks, task]);
   };
-  const updateItemCategory = (id, newCategory) => {
+  const updateItemCategory = (id) => {
     settasks((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, category: newCategory } : item
-      )
+      prevItems.map((item) => {
+        if (item.id === id) {
+          const newCategory =
+            item.category === "Finished" ? item.initialCategory : "Finished";
+          return { ...item, category: newCategory };
+        }
+        return item;
+      })
     );
   };
   return (

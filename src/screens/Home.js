@@ -17,11 +17,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import MyDropdownPicker from "../components/MyDropdownPicker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
-import { View } from "react-native";
+import { View, BackHandler } from "react-native";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import filter from "lodash.filter";
+import { setISOWeekYear } from "date-fns/fp";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function Home({ navigation }) {
   const {
@@ -40,13 +41,10 @@ export default function Home({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
   const textInputRef = useRef(null);
   const [matchData, setMatchData] = useState([]);
+  const [iconStates, setIconStates] = useState({});
 
   const handleSearchQuery = (query) => {
     setSearchQuery(query);
-    // const formattedQuery = filteredItems.toLowerCase();
-    // const filteredData = filter(filteredItems, (user) => {
-    //   //console.log(user);
-    //   return handleQuery(user, formattedQuery);
     const searchList = filteredItems.filter(
       (items) =>
         items.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -54,19 +52,7 @@ export default function Home({ navigation }) {
     );
     setMatchData(searchList);
   };
-  function handleQuery({ title, category }, query) {
-    // const { first, last } = title;
-    console.log(title);
-    if (
-      title.includes(query) ||
-      // last.includes(query) ||
-      category.includes(query)
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+
   //FUNCTION TO TOGGLE search
   const handleSearchIconPress = () => {
     setIsSearchActive(true);
@@ -77,13 +63,7 @@ export default function Home({ navigation }) {
   const handleCancelPress = () => {
     setIsSearchActive(false);
     setSearchQuery("");
-    //setSearchText("");
   };
-  // const handleOutsidePress = () => {
-  //   if (isOpen) {
-  //     setOpen(false);
-  //   }
-  // };
 
   // categorizing your items in flatlist
   const [filteredItems, setFilteredItems] = useState(tasks);
@@ -113,99 +93,124 @@ export default function Home({ navigation }) {
   const handleDeleteItem = (id) => {
     settasks((prevData) => prevData.filter((item) => item.id !== id));
   };
-  // categorizing items
+
   useEffect(() => {
-    if (value === "All Lists") {
-      setFilteredItems(tasks.filter((item) => item.category !== "Finished"));
-    } else {
-      setFilteredItems(tasks.filter((item) => item.category === value));
-    }
-  }, [value, tasks]);
+    // Filter tasks based on the selected value
+    const filterTasks = () => {
+      if (value === "All Lists") {
+        return tasks.filter((item) => item.category !== "Finished");
+      }
+      return tasks.filter((item) => item.category === value);
+    };
+
+    // Update the filtered items state
+    setFilteredItems(filterTasks());
+
+    // Define the back action handler
+    const backAction = () => {
+      if (isSearchActive) {
+        setIsSearchActive(false);
+        setSearchQuery("");
+        return true; // Prevent default behavior
+      }
+      return false; // Allow default behavior
+    };
+
+    // Add the back button event listener
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    // Clean up the event listener on component unmount
+    return () => {
+      backHandler.remove();
+    };
+  }, [value, tasks, isSearchActive]);
+
   // Task finished update
 
-  const [finish, setFinish] = useState(false);
   const handleItemPress = (id) => {
-    // setFinish(!finish);
-    //console.log(id);
-    updateItemCategory(id, "Finished");
+    setIconStates((prevStates) => ({
+      ...prevStates,
+      [id]: !prevStates[id],
+    }));
+    updateItemCategory(id);
   };
 
-  const _renderItem = ({ item }) => (
-    <View>
-      <Text
-        style={{
-          padding: 10,
-          fontSize: 16,
-          color: "#004997",
-          fontWeight: "bold",
-        }}
-      >
-        {item.presentDay ? item.presentDay : "No date"}
-      </Text>
-      <Swipeable
-        renderLeftActions={() => leftSwipe(() => handleDeleteItem(item.id))}
-        onSwipeableOpen={() => setSwipedItemId(item.id)}
-        onSwipeableClose={() => setSwipedItemId(null)}
-        overshootRight={false}
-        overshootLeft={false}
-        friction={2}
-        leftThreshold={30}
-        ref={(ref) => {
-          if (ref && swipedItemId && swipedItemId !== item.id) {
-            ref.close();
-          }
-        }}
-      >
-        <View
-          style={[
-            styles.outerView,
-            { backgroundColor: item.color ? item.color : "#004997" },
-          ]}
+  const _renderItem = ({ item }) => {
+    const iconName = iconStates[item.id]
+      ? "checkbox-multiple-marked-outline"
+      : "checkbox-multiple-blank-outline";
+    return (
+      <View>
+        <Text
+          style={{
+            padding: 10,
+            fontSize: 16,
+            color: "#004997",
+            fontWeight: "bold",
+          }}
         >
-          <View style={styles.item}>
-            <TouchableOpacity onPress={() => handleItemPress(item.id)}>
-              {/* {finish && item.id ? (
-                <MaterialCommunityIcons
-                  name="checkbox-marked"
-                  size={24}
-                  color="black"
-                />
-              ) : ( */}
-              <Ionicons name="stop-outline" size={24} color="white" />
-              {/* )} */}
-            </TouchableOpacity>
-            <Text style={styles.title}>{item.title}</Text>
+          {item.presentDay ? item.presentDay : "No date"}
+        </Text>
+        <Swipeable
+          renderLeftActions={() => leftSwipe(() => handleDeleteItem(item.id))}
+          onSwipeableOpen={() => setSwipedItemId(item.id)}
+          onSwipeableClose={() => setSwipedItemId(null)}
+          overshootRight={false}
+          overshootLeft={false}
+          friction={2}
+          leftThreshold={30}
+          ref={(ref) => {
+            if (ref && swipedItemId && swipedItemId !== item.id) {
+              ref.close();
+            }
+          }}
+        >
+          <View
+            style={[
+              styles.outerView,
+              { backgroundColor: item.color ? item.color : "#004997" },
+            ]}
+          >
+            <View style={styles.item}>
+              <TouchableOpacity onPress={() => handleItemPress(item.id)}>
+                <Icon name={iconName} size={24} color="white" />
+              </TouchableOpacity>
+              <Text style={styles.title}>{item.title}</Text>
+            </View>
+            {item.date ? (
+              <Text
+                style={{
+                  alignSelf: "stretch",
+                  marginVertical: 3,
+                  marginLeft: 35,
+                  fontSize: 16,
+                  fontWeight: "400",
+                  color: "white",
+                }}
+              >
+                {item.date}
+              </Text>
+            ) : null}
+            {item.category ? (
+              <Text
+                style={{
+                  marginLeft: 35,
+                  fontSize: 16,
+                  color: "white",
+                  fontWeight: "500",
+                }}
+              >
+                {item.category}
+              </Text>
+            ) : null}
           </View>
-          {item.date ? (
-            <Text
-              style={{
-                alignSelf: "stretch",
-                marginVertical: 3,
-                marginLeft: 35,
-                fontSize: 16,
-                fontWeight: "400",
-                color: "white",
-              }}
-            >
-              {item.date}
-            </Text>
-          ) : null}
-          {item.category ? (
-            <Text
-              style={{
-                marginLeft: 35,
-                fontSize: 16,
-                color: "white",
-                fontWeight: "500",
-              }}
-            >
-              {item.category}
-            </Text>
-          ) : null}
-        </View>
-      </Swipeable>
-    </View>
-  );
+        </Swipeable>
+      </View>
+    );
+  };
   return (
     // <SafeAreaView style={styles.container}>
     // <TouchableWithoutFeedback onPress={handleOutsidePress}>
@@ -254,7 +259,7 @@ export default function Home({ navigation }) {
                 clearButtonMode="always"
                 value={searchQuery}
                 onChangeText={(query) => handleSearchQuery(query)}
-                onBlur={() => setIsSearchActive(false)}
+                //onBlur={() => setIsSearchActive(false)}
               />
             </View>
           </View>
