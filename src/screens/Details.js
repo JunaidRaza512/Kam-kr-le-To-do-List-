@@ -21,11 +21,76 @@ import { ContextList } from "../contexts/ContextState";
 import { useContext } from "react";
 import uuid from "react-native-uuid";
 import { format } from "date-fns";
+import { useEffect } from "react";
 
-export default function Details({ navigation }) {
-  // console.log(format(new Date(), "MMMM d, yyyy"));
-  // console.log(format(new Date(), "h:mm a"));
-  // colors  array
+export default function Details({ navigation, route }) {
+  //title of the task
+  const [newTaskColor, setnewTaskColor] = useState("");
+  // adding new items dynamically into flatlist function
+  // const { addTask, editTask } = useContext(ContextList);
+  // task Added InputText usestate
+  const [_addedActivity, set_addedActivity] = useState("");
+  //Modal of Add new category
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  // category input state
+  const [task, setTask] = useState("");
+  //InputText Height to change size
+  const [inputHeight, setInputHeight] = useState(0);
+  // datepicker and time picker usestate
+  const [date, setDate] = useState(new Date()); // date usestate
+  const [time, setTime] = useState(new Date()); // time usestate
+  const [day, setDay] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false); // showdatepicker usestate
+  const [showTimePicker, setShowTimePicker] = useState(false); ///time picker usestate
+  const [showTime, setShowTime] = useState(false); //conditional rendering of time text
+  const [formattedDate, setFormattedDate] = useState(
+    format(new Date(), "MMMM d, yyyy")
+  );
+  const [formattedTime, setFormattedTime] = useState(
+    format(new Date(), "h:mm a")
+  );
+  // editing task state
+  const [editTaskId, setEditTaskId] = useState(null);
+  // dropdown picker
+  const {
+    isOpen,
+    setOpen,
+    value,
+    setValue,
+    items,
+    setItems,
+    addTask,
+    editTask,
+    filteredItems,
+  } = useContext(ContextList);
+
+  //Accepting values from Home Screen
+  const { item } = route.params || {
+    item: {
+      title: "",
+      category: "All Lists",
+      date: formattedDate,
+      id: "",
+      initialCategory: "",
+    },
+  };
+  //console.log(item.item.initialDate);
+  useEffect(() => {
+    if (item) {
+      set_addedActivity(item.title);
+      setFormattedDate(item.date);
+      if (item.category === "Finished") {
+        setValue(item.initialCategory);
+      } else {
+        setValue(item.category);
+      }
+
+      setEditTaskId(item.id);
+    }
+  }, []);
+
+  //console.log(editItem);
+  //colors array
   const backGroundColors = [
     "#5CD859",
     "#24A6D9",
@@ -35,33 +100,31 @@ export default function Details({ navigation }) {
     "#D85963",
     "#D88559",
   ];
-  const [newTaskColor, setnewTaskColor] = useState("");
-  // adding new items dynamically into flatlist function
-  const { addTask } = useContext(ContextList);
-  // task Added InputText usestate
-  const [_addedActivity, set_addedActivity] = useState("");
+
   // items added function handling
   const taskAdded = () => {
     if (_addedActivity.trim() === "") {
       Alert.alert("Error", "Please Enter your Task");
     } else {
       const activity = {
-        id: uuid.v4(),
+        id: editTaskId ? editTaskId : uuid.v4(),
         title: _addedActivity,
         date: formattedDate,
         category: value,
         color: newTaskColor,
         presentDay: day,
       };
-      addTask(activity);
+      if (editTaskId) {
+        editTask(activity); // Update the existing task
+      } else {
+        addTask(activity); // Add a new task
+      }
       set_addedActivity("");
+      setEditTaskId("");
       navigation.goBack();
     }
   };
-  //Modal of Add new category
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  // category input state
-  const [task, setTask] = useState("");
+
   //function of adding category
   const handleAddTask = () => {
     // Logic to add task to a list
@@ -70,9 +133,9 @@ export default function Details({ navigation }) {
     } else {
       const category = {
         label: task,
-        value: task.toLowerCase().replace(/\s+/g, ""),
+        value: task, //.toLowerCase().replace(/\s+/g, ""),
       };
-      setItems([...items, category]); // adding item
+      setItems([...filteredItems, category]); // adding item
       //setValue(category);
       // Reset the task input
       setTask("");
@@ -80,21 +143,6 @@ export default function Details({ navigation }) {
       setIsModalVisible(false);
     }
   };
-  //InputText Height to change size
-  const [inputHeight, setInputHeight] = useState(0);
-  // datepicker and time picker
-  const [date, setDate] = useState(new Date()); // date usestate
-  const [time, setTime] = useState(new Date()); // time usestate
-  const [formattedDate, setFormattedDate] = useState(
-    format(new Date(), "MMMM d, yyyy")
-  );
-  const [formattedTime, setFormattedTime] = useState(
-    format(new Date(), "h:mm a")
-  );
-  const [day, setDay] = useState("");
-  const [showDatePicker, setShowDatePicker] = useState(false); // showdatepicker usestate
-  const [showTimePicker, setShowTimePicker] = useState(false); ///time picker usestate
-  const [showTime, setShowTime] = useState(false); //conditional rendering of time text
 
   // date selection
   const onChangeDate = (_, selectedDate) => {
@@ -118,9 +166,6 @@ export default function Details({ navigation }) {
     setTime(currentTime);
     setFormattedTime(format(currentTime, "h:mm a"));
   };
-  // dropdown picker
-  const { isOpen, setOpen, value, setValue, items, setItems } =
-    useContext(ContextList);
 
   return (
     <KeyboardAwareScrollView
@@ -266,14 +311,14 @@ export default function Details({ navigation }) {
               <DropDownPicker
                 open={isOpen}
                 value={value}
-                items={items}
+                items={filteredItems}
                 setOpen={() => setOpen(!isOpen)}
                 setValue={(val) => setValue(val)}
                 setItems={setItems}
                 style={styles.dropDown}
                 dropDownContainerStyle={styles.dropDownContainerStyle}
                 dropDownDirection="BOTTOM"
-                placeholder="Category"
+                placeholder="Select a Category"
                 placeholderStyle={{
                   color: "white",
                   fontSize: 18,
@@ -325,7 +370,11 @@ export default function Details({ navigation }) {
                       alignItems: "center",
                     }}
                   >
-                    <Button title="Submit" onPress={handleAddTask} />
+                    <Button
+                      style={{ backgroundColor: "red", color: "green" }}
+                      title="Submit"
+                      onPress={handleAddTask}
+                    />
                     <Button
                       title="Cancel"
                       onPress={() => setIsModalVisible(false)}

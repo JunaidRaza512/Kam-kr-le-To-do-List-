@@ -13,14 +13,14 @@ import { ContextList } from "../contexts/ContextState";
 import { useContext } from "react";
 import { Swipeable } from "react-native-gesture-handler";
 import { AntDesign } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
 import MyDropdownPicker from "../components/MyDropdownPicker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
-import { View, BackHandler } from "react-native";
+import { View, BackHandler, Keyboard } from "react-native";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { TapGestureHandler } from "react-native-gesture-handler";
 import { setISOWeekYear } from "date-fns/fp";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
@@ -45,12 +45,16 @@ export default function Home({ navigation }) {
 
   const handleSearchQuery = (query) => {
     setSearchQuery(query);
-    const searchList = filteredItems.filter(
-      (items) =>
-        items.title.toLowerCase().includes(query.toLowerCase()) ||
-        items.category.toLowerCase().includes(query.toLowerCase())
-    );
-    setMatchData(searchList);
+    if (query.length > 0) {
+      const searchList = filteredItems.filter(
+        (items) =>
+          items.title.toLowerCase().includes(query.toLowerCase()) ||
+          items.category.toLowerCase().includes(query.toLowerCase())
+      );
+      setMatchData(searchList);
+    } else {
+      setMatchData(filteredItems);
+    }
   };
 
   //FUNCTION TO TOGGLE search
@@ -67,6 +71,7 @@ export default function Home({ navigation }) {
 
   // categorizing your items in flatlist
   const [filteredItems, setFilteredItems] = useState(tasks);
+  //navigating to detail screen
   const _addTask = () => {
     navigation.navigate("Details");
   };
@@ -93,7 +98,8 @@ export default function Home({ navigation }) {
   const handleDeleteItem = (id) => {
     settasks((prevData) => prevData.filter((item) => item.id !== id));
   };
-
+  //  const handleOutsidePress=()=>
+  const [finished, setFinished] = useState(false);
   useEffect(() => {
     // Filter tasks based on the selected value
     const filterTasks = () => {
@@ -131,11 +137,18 @@ export default function Home({ navigation }) {
   // Task finished update
 
   const handleItemPress = (id) => {
-    setIconStates((prevStates) => ({
-      ...prevStates,
-      [id]: !prevStates[id],
-    }));
-    updateItemCategory(id);
+    setTimeout(() => {
+      setIconStates((prevStates) => ({
+        ...prevStates,
+        [id]: !prevStates[id],
+      }));
+      setFinished(!finished);
+      updateItemCategory(id, finished);
+    }, 1000);
+  };
+  const editTask = (item) => {
+    navigation.navigate("Details", { item });
+    //fillInputFields(item);
   };
 
   const _renderItem = ({ item }) => {
@@ -168,52 +181,72 @@ export default function Home({ navigation }) {
             }
           }}
         >
-          <View
-            style={[
-              styles.outerView,
-              { backgroundColor: item.color ? item.color : "#004997" },
-            ]}
-          >
-            <View style={styles.item}>
-              <TouchableOpacity onPress={() => handleItemPress(item.id)}>
-                <Icon name={iconName} size={24} color="white" />
-              </TouchableOpacity>
-              <Text style={styles.title}>{item.title}</Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => editTask(item)}>
+            <View
+              style={[
+                styles.outerView,
+                { backgroundColor: item.color ? item.color : "#004997" },
+              ]}
+            >
+              <View style={styles.item}>
+                <TouchableOpacity onPress={() => handleItemPress(item.id)}>
+                  <Icon
+                    name={iconName}
+                    size={24}
+                    color={iconStates[item.id] ? "red" : "white"}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.title}>{item.title}</Text>
+              </View>
+
+              {item.date ? (
+                <Text
+                  style={{
+                    alignSelf: "stretch",
+                    marginVertical: 5,
+                    marginLeft: 35,
+                    fontSize: 16,
+                    fontWeight: "400",
+                    color: "white",
+                  }}
+                >
+                  {item.date}
+                </Text>
+              ) : null}
+              {item.category ? (
+                <View
+                  style={{
+                    borderRadius: 2,
+                    backgroundColor: "#003082",
+                    maxWidth: 180,
+                    padding: 8,
+                    borderRadius: 20,
+                    elevation: 2,
+                    borderWidth: 0.3,
+                    marginTop: 3,
+                  }}
+                >
+                  <Text
+                    style={{
+                      marginLeft: 35,
+                      fontSize: 16,
+                      color: "white",
+                      fontWeight: "700",
+                    }}
+                  >
+                    {item.category}
+                  </Text>
+                </View>
+              ) : null}
             </View>
-            {item.date ? (
-              <Text
-                style={{
-                  alignSelf: "stretch",
-                  marginVertical: 3,
-                  marginLeft: 35,
-                  fontSize: 16,
-                  fontWeight: "400",
-                  color: "white",
-                }}
-              >
-                {item.date}
-              </Text>
-            ) : null}
-            {item.category ? (
-              <Text
-                style={{
-                  marginLeft: 35,
-                  fontSize: 16,
-                  color: "white",
-                  fontWeight: "500",
-                }}
-              >
-                {item.category}
-              </Text>
-            ) : null}
-          </View>
+          </TouchableOpacity>
         </Swipeable>
       </View>
     );
   };
   return (
-    // <SafeAreaView style={styles.container}>
-    // <TouchableWithoutFeedback onPress={handleOutsidePress}>
+    // <TouchableWithoutFeedback>
+    // <TapGestureHandler onHandlerStateChange={handleOutsidePress}>
     <View style={styles.container}>
       <View
         style={{
@@ -285,6 +318,7 @@ export default function Home({ navigation }) {
                 size={24}
                 color="white"
               />
+
               <MyDropdownPicker
                 open={isOpen}
                 setOpen={setOpen}
@@ -303,6 +337,7 @@ export default function Home({ navigation }) {
         )}
       </View>
       <FlatList
+        //numColumns={2}
         showsVerticalScrollIndicator={false}
         data={searchQuery.length > 0 ? matchData : filteredItems}
         renderItem={_renderItem}
@@ -312,8 +347,8 @@ export default function Home({ navigation }) {
         <Ionicons name="add-circle-outline" size={50} color="white" />
       </TouchableOpacity>
     </View>
+    // </TapGestureHandler>
     // </TouchableWithoutFeedback>
-    //   </SafeAreaView>
   );
 }
 

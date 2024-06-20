@@ -9,9 +9,10 @@ export const ContextState = ({ children }) => {
     {
       id: 1,
       title: "First Item",
-      date: "4th feb,2024",
-      category: "Shopping",
-      initialCategory: "Shopping",
+      itemDate: "4th feb,2024",
+      category: "Birthday",
+      initialCategory: "Birthday",
+      completed: false,
     },
     {
       id: 2,
@@ -19,6 +20,7 @@ export const ContextState = ({ children }) => {
       date: "4th feb,2024",
       category: "Birthday",
       initialCategory: "Birthday",
+      completed: false,
     },
     {
       id: 3,
@@ -26,6 +28,7 @@ export const ContextState = ({ children }) => {
       date: "4th feb,2024",
       category: "Work",
       initialCategory: "Work",
+      completed: false,
     },
     {
       id: 45,
@@ -33,6 +36,7 @@ export const ContextState = ({ children }) => {
       date: "4th feb,2024",
       category: "Errands",
       initialCategory: "Errands",
+      completed: false,
     },
     {
       id: 46,
@@ -40,6 +44,7 @@ export const ContextState = ({ children }) => {
       date: "4th feb,2024",
       category: "Errands",
       initialCategory: "Errands",
+      completed: false,
     },
     {
       id: 47,
@@ -47,6 +52,7 @@ export const ContextState = ({ children }) => {
       date: "4th feb,2024",
       category: "WishList",
       initialCategory: "WishList",
+      completed: false,
     },
     {
       id: 48,
@@ -54,12 +60,14 @@ export const ContextState = ({ children }) => {
       date: "4th feb,2024",
       category: "Personal",
       initialCategory: "Personal",
+      completed: false,
     },
     {
       id: 41,
       title: "Third Item",
       category: "Personal",
       initialCategory: "Personal",
+      completed: false,
     },
   ]);
   // DropdownPIcker Component data
@@ -67,29 +75,31 @@ export const ContextState = ({ children }) => {
   const [value, setValue] = useState("All Lists"); // value selcted in items
   const [items, setItems] = useState([
     { label: "All Lists", value: "All Lists" },
-    { label: "Work", value: "work" },
+    { label: "Work", value: "Work" },
     {
       label: "Personal",
-      value: "personal",
+      value: "Personal",
     },
     {
       label: "Errands",
-      value: "errands",
+      value: "Errands",
     },
     {
       label: "Birthday",
-      value: "birthday",
+      value: "Birthday",
     },
     {
       label: "School",
-      value: "school",
+      value: "School",
     },
     { label: "Finished", value: "Finished" },
   ]);
+  const filteredItems = items.filter((item) => item.value !== "Finished");
+  // Adding new Task
   const addTask = (task) => {
-    console.log(task);
     settasks([...tasks, task]);
   };
+  // marking task and undoing task
   const updateItemCategory = (id) => {
     settasks((prevItems) =>
       prevItems.map((item) => {
@@ -101,6 +111,15 @@ export const ContextState = ({ children }) => {
         return item;
       })
     );
+  };
+  const editTask = (updatedTask) => {
+    settasks((prevTasks) => {
+      //console.log(prevTasks);
+      return prevTasks.map((task) => {
+        console.log(task);
+        return task.id === updatedTask.id ? updatedTask : task;
+      });
+    });
   };
   return (
     <ContextList.Provider
@@ -115,6 +134,8 @@ export const ContextState = ({ children }) => {
         value,
         setValue,
         updateItemCategory,
+        editTask,
+        filteredItems,
       }}
     >
       {children}
