@@ -20,7 +20,7 @@ import { View, BackHandler, Keyboard } from "react-native";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { db } from "../database/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
@@ -50,7 +50,7 @@ export default function Home({ navigation }) {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(tasks);
+
       return tasks;
     } catch (e) {
       console.error("Error fetching documents: ", e);
@@ -128,8 +128,13 @@ export default function Home({ navigation }) {
     );
   };
   // function to perform delete operation
-  const handleDeleteItem = (id) => {
-    settasks((prevData) => prevData.filter((item) => item.id !== id));
+  const handleDeleteItem = async (id) => {
+    try {
+      await deleteDoc(doc(db, "Todos", id));
+      settasks((prevData) => prevData.filter((item) => item.id !== id));
+    } catch (e) {
+      console.error("Error deleting document: ", error);
+    }
   };
   //  const handleOutsidePress=()=>
   const [finished, setFinished] = useState(false);

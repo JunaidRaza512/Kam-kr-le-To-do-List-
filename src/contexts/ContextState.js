@@ -96,9 +96,9 @@ export const ContextState = ({ children }) => {
   ]);
   const filteredItems = items.filter((item) => item.value !== "Finished");
   // Adding new Task
-  const addTask = (task) => {
-    settasks([...tasks, task]);
-  };
+  // const addTask = (task) => {
+  //   settasks([...tasks, task]);
+  // };
   // marking task and undoing task
   const updateItemCategory = (id) => {
     settasks((prevItems) =>
@@ -112,20 +112,20 @@ export const ContextState = ({ children }) => {
       })
     );
   };
-  const editTask = (updatedTask) => {
-    settasks((prevTasks) => {
-      //console.log(prevTasks);
-      return prevTasks.map((task) => {
-        console.log(task);
-        return task.id === updatedTask.id ? updatedTask : task;
-      });
-    });
-  };
+  // const editTask = (updatedTask) => {
+  //   settasks((prevTasks) => {
+  //     //console.log(prevTasks);
+  //     return prevTasks.map((task) => {
+  //       console.log(task);
+  //       return task.id === updatedTask.id ? updatedTask : task;
+  //     });
+  //   });
+  // };
   return (
     <ContextList.Provider
       value={{
         tasks,
-        addTask,
+        // addTask,
         settasks,
         items,
         setItems,
@@ -134,7 +134,7 @@ export const ContextState = ({ children }) => {
         value,
         setValue,
         updateItemCategory,
-        editTask,
+        // editTask,
         filteredItems,
       }}
     >

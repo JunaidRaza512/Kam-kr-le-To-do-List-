@@ -21,9 +21,16 @@ import { ContextList } from "../contexts/ContextState";
 import { useContext } from "react";
 import uuid from "react-native-uuid";
 import { format } from "date-fns";
-import { collection, addDoc, updateDoc, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "../database/firebaseConfig";
 import { useEffect } from "react";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function Details({ navigation, route }) {
   //title of the task
@@ -61,11 +68,11 @@ export default function Details({ navigation, route }) {
     setValue,
     items,
     setItems,
-    addTask,
-    editTask,
+    // addTask,
+    // editTask,
     filteredItems,
   } = useContext(ContextList);
-
+  // const isFocused = useIsFocused();
   //Accepting values from Home Screen
   const { item } = route.params || {
     item: {
@@ -86,10 +93,19 @@ export default function Details({ navigation, route }) {
       } else {
         setValue(item.category);
       }
-
       setEditTaskId(item.id);
     }
   }, []);
+  // useEffect(() => {
+  //   const loadTasks = async () => {
+  //     const tasks = await fetchCategory();
+  //     setItems(tasks);
+  //   };
+
+  //   if (isFocused) {
+  //     loadTasks();
+  //   }
+  // });
 
   //console.log(editItem);
   //colors array
@@ -147,20 +163,46 @@ export default function Details({ navigation, route }) {
       }
     }
   };
+  // const fetchCategory = async () => {
+  //   try {
+  //     const querySnapshot = await getDocs(collection(db, "Categories"));
+  //     //console.log(querySnapshot);
+  //     const tasks = querySnapshot.docs.map((doc) => ({
+  //       //console.log(doc);
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
 
+  //     return tasks;
+  //   } catch (e) {
+  //     console.error("Error fetching documents: ", e);
+  //     return [];
+  //   }
+  // };
   //function of adding category
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     // Logic to add task to a list
     if (task.trim() === "") {
       Alert.alert("Error", "task cannot be empty.");
     } else {
+      // try {
+      //   const itemCategory = collection(db, "Categories");
+      //   const addedItem = await addDoc(itemCategory, {
+      //     label: task,
+      //     value: task,
+      //   });
+      //   console.log("Category has been automatically updated", addedItem.id);
+      //
+      // } catch (e) {
+      //   console.error("Error adding document: ", e);
+      // }
       const category = {
         label: task,
-        value: task, //.toLowerCase().replace(/\s+/g, ""),
+        value: task,
       };
       setItems([...filteredItems, category]); // adding item
-      //setValue(category);
-      // Reset the task input
+      setValue(category);
+      //Reset the task input
       setTask("");
       // Hide the modal
       setIsModalVisible(false);
