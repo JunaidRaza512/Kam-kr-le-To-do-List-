@@ -21,6 +21,8 @@ import { ContextList } from "../contexts/ContextState";
 import { useContext } from "react";
 import uuid from "react-native-uuid";
 import { format } from "date-fns";
+import { collection, addDoc, updateDoc, doc, getDoc } from "firebase/firestore";
+import { db } from "../database/firebaseConfig";
 import { useEffect } from "react";
 
 export default function Details({ navigation, route }) {
@@ -102,26 +104,47 @@ export default function Details({ navigation, route }) {
   ];
 
   // items added function handling
-  const taskAdded = () => {
+  const taskAdded = async () => {
     if (_addedActivity.trim() === "") {
       Alert.alert("Error", "Please Enter your Task");
     } else {
-      const activity = {
-        id: editTaskId ? editTaskId : uuid.v4(),
-        title: _addedActivity,
-        date: formattedDate,
-        category: value,
-        color: newTaskColor,
-        presentDay: day,
-      };
-      if (editTaskId) {
-        editTask(activity); // Update the existing task
-      } else {
-        addTask(activity); // Add a new task
+      try {
+        if (editTaskId) {
+          console.log(editTaskId);
+          const docRef = doc(db, "Todos", editTaskId);
+          // console.log(docRef);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            await updateDoc(docRef, {
+              title: _addedActivity,
+              date: formattedDate,
+              category: value,
+              initialCategory: value,
+              color: newTaskColor,
+              presentDay: day,
+            });
+            console.log(`Document with ID ${editTaskId} successfully updated!`);
+          } else {
+            Alert.alert("Error", "Document not found for updating.");
+          }
+        } else {
+          await addDoc(collection(db, "Todos"), {
+            //id: editTaskId ? editTaskId : uuid.v4(),
+            title: _addedActivity,
+            date: formattedDate,
+            category: value,
+            initialCategory: value,
+            color: newTaskColor,
+            presentDay: day,
+          });
+        }
+
+        set_addedActivity("");
+        setEditTaskId("");
+        navigation.goBack();
+      } catch (e) {
+        console.error("Error adding document: ", e);
       }
-      set_addedActivity("");
-      setEditTaskId("");
-      navigation.goBack();
     }
   };
 

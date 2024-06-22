@@ -19,10 +19,12 @@ import { EvilIcons } from "@expo/vector-icons";
 import { View, BackHandler, Keyboard } from "react-native";
 import { useEffect } from "react";
 import { useRef } from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { TapGestureHandler } from "react-native-gesture-handler";
-import { setISOWeekYear } from "date-fns/fp";
+import { db } from "../database/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
+
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+
+import { useIsFocused } from "@react-navigation/native";
 
 export default function Home({ navigation }) {
   const {
@@ -36,6 +38,37 @@ export default function Home({ navigation }) {
     items,
     setItems,
   } = useContext(ContextList);
+
+  const isFocused = useIsFocused();
+
+  const fetchTasks = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Todos"));
+      //console.log(querySnapshot);
+      const tasks = querySnapshot.docs.map((doc) => ({
+        //console.log(doc);
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log(tasks);
+      return tasks;
+    } catch (e) {
+      console.error("Error fetching documents: ", e);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const loadTasks = async () => {
+      const tasks = await fetchTasks();
+      settasks(tasks);
+    };
+
+    if (isFocused) {
+      loadTasks();
+    }
+  }, [isFocused]);
+
   //Search Filter State
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,6 +180,7 @@ export default function Home({ navigation }) {
     }, 1000);
   };
   const editTask = (item) => {
+    console.log(item.id);
     navigation.navigate("Details", { item });
     //fillInputFields(item);
   };
